@@ -2,13 +2,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_constants.dart';
 import '../models/user_model.dart';
-import '../services/supabase_service.dart';
+import '../services/appwrite_service.dart';
 import '../services/otp_service.dart';
 
 // ─── Service Providers ──────────────────────────────
 
-final supabaseServiceProvider = Provider<SupabaseService>((ref) {
-  return SupabaseService();
+final appwriteServiceProvider = Provider<AppwriteService>((ref) {
+  return AppwriteService();
 });
 
 final otpServiceProvider = Provider<OtpService>((ref) {
@@ -50,10 +50,10 @@ class AuthState {
 // ─── Auth Notifier ──────────────────────────────────
 
 class AuthNotifier extends StateNotifier<AuthState> {
-  final SupabaseService _supabaseService;
+  final AppwriteService _appwriteService;
   final OtpService _otpService;
 
-  AuthNotifier(this._supabaseService, this._otpService)
+  AuthNotifier(this._appwriteService, this._otpService)
       : super(const AuthState());
 
   /// Check if user is already logged in via SharedPreferences.
@@ -82,7 +82,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
     try {
       // Check if user already exists
-      final exists = await _supabaseService.checkUserExists(mobile);
+      final exists = await _appwriteService.checkUserExists(mobile);
       if (exists) {
         state = state.copyWith(
           status: AuthStatus.error,
@@ -92,7 +92,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       }
 
       // Create user
-      final user = await _supabaseService.createUser(fullName, mobile);
+      final user = await _appwriteService.createUser(fullName, mobile);
 
       // Send OTP
       final sessionId = await _otpService.sendOtp(mobile);
@@ -114,7 +114,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> login(String mobile) async {
     state = state.copyWith(status: AuthStatus.loading, errorMessage: null);
     try {
-      final user = await _supabaseService.getUserByMobile(mobile);
+      final user = await _appwriteService.getUserByMobile(mobile);
       if (user == null) {
         state = state.copyWith(
           status: AuthStatus.error,
@@ -161,9 +161,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return false;
       }
 
-      // Update verification status in Supabase
+      // Update verification status in Appwrite
       final mobile = state.user?.mobileNumber ?? '';
-      await _supabaseService.updateVerificationStatus(mobile);
+      await _appwriteService.updateVerificationStatus(mobile);
 
       // Save session locally
       final prefs = await SharedPreferences.getInstance();
@@ -231,7 +231,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 // ─── Provider ───────────────────────────────────────
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  final supabaseService = ref.read(supabaseServiceProvider);
+  final appwriteService = ref.read(appwriteServiceProvider);
   final otpService = ref.read(otpServiceProvider);
-  return AuthNotifier(supabaseService, otpService);
+  return AuthNotifier(appwriteService, otpService);
 });

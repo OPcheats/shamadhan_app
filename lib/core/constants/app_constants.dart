@@ -2,12 +2,11 @@
 class AppConstants {
   AppConstants._();
 
-  // ─── Supabase ────────────────────────────────────
-  /// Replace with your Supabase project URL.
-  static const String supabaseUrl = 'https://pmdicznuxlghjeviyalib.supabase.co';
-
-  /// Replace with your Supabase anon/public key.
-  static const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtZGljem51eGxnaGpldnlpYWxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg3NDg4MjEsImV4cCI6MjA4NDMyNDgyMX0.xgMiVczzMwtQQOdwTO0y6K87aV5b_34270YrKakqD48';
+  // ─── Appwrite ─────────────────────────────────────
+  static const String appwriteEndpoint = 'https://sgp.cloud.appwrite.io/v1';
+  static const String appwriteProjectId = '69a70f620029fee9a7a2';
+  static const String appwriteDatabaseId = 'shamadhan_db';      // ← set your DB ID here
+  static const String appwriteUsersCollectionId = 'users';      // ← set your Collection ID here
 
   // ─── 2Factor.in ──────────────────────────────────
   /// Replace with your 2Factor.in API key.
