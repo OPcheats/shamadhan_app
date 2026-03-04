@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/providers/webview_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/validators.dart';
 import '../providers/auth_provider.dart';
+
 
 /// Login screen — mobile number input only.
 class LoginScreen extends ConsumerStatefulWidget {
@@ -19,6 +21,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _mobileController = TextEditingController();
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Kick off website preload in the background while the user is on this
+    // screen so HomeScreen loads instantly after authentication.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(webViewControllerProvider);
+    });
+  }
 
   @override
   void dispose() {

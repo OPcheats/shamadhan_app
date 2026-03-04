@@ -5,8 +5,8 @@ class AppConstants {
   // ─── Appwrite ─────────────────────────────────────
   static const String appwriteEndpoint = 'https://sgp.cloud.appwrite.io/v1';
   static const String appwriteProjectId = '69a70f620029fee9a7a2';
-  static const String appwriteDatabaseId = 'shamadhan_db';      // ← set your DB ID here
-  static const String appwriteUsersCollectionId = 'users';      // ← set your Collection ID here
+  static const String appwriteDatabaseId = '69a7157600307b65dea5';
+  static const String appwriteUsersCollectionId = 'users';
 
   // ─── 2Factor.in ──────────────────────────────────
   /// Replace with your 2Factor.in API key.
