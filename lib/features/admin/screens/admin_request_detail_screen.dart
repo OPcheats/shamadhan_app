@@ -15,7 +15,7 @@ class AdminRequestDetailScreen extends StatelessWidget {
     final clientName = data['client_name'] as String? ?? '—';
     final phone = data['phone'] as String? ?? '—';
     final service = data['service'] as String? ?? '—';
-    final serviceType = data['service_type'] as String? ?? '';
+    final serviceType = data['type'] as String? ?? '';
     final ayaType = data['aya_type'] as String? ?? '';
     final address = data['address'] as String? ?? '—';
     final date = data['preferred_date'] as String? ?? '—';

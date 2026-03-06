@@ -50,7 +50,7 @@ class ServiceRequestModel {
         'client_name': clientName,
         'phone': phone,
         'service': service,
-        'service_type': type,
+        'type': type,
         'aya_type': ayaType,
         'address': address,
         'preferred_date': preferredDate,
