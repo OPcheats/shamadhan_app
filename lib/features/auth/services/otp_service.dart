@@ -11,6 +11,19 @@ class OtpService {
   /// Send OTP to the given mobile number.
   /// Returns the session ID on success, throws on failure.
   Future<String> sendOtp(String mobile) async {
+    // --- DEMO OVERRIDE ---
+    print('=======================================');
+    print('⚠️ DEMO MODE: OTP Verification Bypassed');
+    print('⚠️ SENDING MOCK SMS TO: $mobile');
+    print('⚠️ PLEASE USE OTP: 123456');
+    print('=======================================');
+    
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 1));
+    return 'demo_session_id_${DateTime.now().millisecondsSinceEpoch}';
+    // ----------------------
+
+    /* ORIGINAL LOGIC:
     final url =
         '${AppConstants.twoFactorBaseUrl}/${AppConstants.twoFactorApiKey}/SMS/$mobile/AUTOGEN';
 
@@ -23,11 +36,24 @@ class OtpService {
         response['Details'] as String? ?? 'Failed to send OTP',
       );
     }
+    */
   }
 
   /// Verify OTP using session ID and user-entered OTP.
   /// Returns true if verified, false otherwise.
   Future<bool> verifyOtp(String sessionId, String otp) async {
+    // --- DEMO OVERRIDE ---
+    print('⚠️ DEMO MODE: Verifying OTP: $otp');
+    await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
+    
+    if (otp == '123456') {
+      return true;
+    } else {
+      return false; 
+    }
+    // ----------------------
+
+    /* ORIGINAL LOGIC:
     final url =
         '${AppConstants.twoFactorBaseUrl}/${AppConstants.twoFactorApiKey}/SMS/VERIFY/$sessionId/$otp';
 
@@ -42,6 +68,7 @@ class OtpService {
       }
       return false;
     }
+    */
   }
 
   void dispose() {

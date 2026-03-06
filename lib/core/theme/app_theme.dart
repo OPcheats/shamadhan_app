@@ -17,7 +17,11 @@ class AppTheme {
         surface: AppColors.surface,
         error: AppColors.error,
       ),
-      fontFamily: GoogleFonts.inter().fontFamily,
+      fontFamily: GoogleFonts.montserrat().fontFamily,
+      textTheme: GoogleFonts.montserratTextTheme(ThemeData.dark().textTheme).apply(
+        bodyColor: AppColors.textPrimary,
+        displayColor: AppColors.textPrimary,
+      ),
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.background,
         elevation: 0,

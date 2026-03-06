@@ -8,6 +8,15 @@ import 'features/auth/screens/otp_screen.dart';
 import 'features/home/screens/home_screen.dart';
 import 'features/internet/screens/no_internet_screen.dart';
 import 'features/internet/screens/connectivity_wrapper.dart';
+import 'features/services/screens/service_list_screen.dart';
+import 'features/services/screens/service_type_screen.dart';
+import 'features/services/screens/aya_work_type_screen.dart';
+import 'features/services/screens/client_details_screen.dart';
+import 'features/services/screens/schedule_contact_screen.dart';
+import 'features/services/screens/request_confirmation_screen.dart';
+import 'features/admin/screens/admin_login_screen.dart';
+import 'features/admin/screens/admin_dashboard_screen.dart';
+import 'features/admin/screens/admin_request_detail_screen.dart';
 
 /// Root MaterialApp widget.
 class ShamadhanApp extends StatelessWidget {
@@ -51,10 +60,43 @@ class ShamadhanApp extends StatelessWidget {
       case '/home':
         page = const HomeScreen();
         break;
+
+      // ── Service flow ────────────────────────────────────────────────────
+      case '/service-list':
+        page = const ServiceListScreen();
+        break;
+      case '/service-type':
+        page = const ServiceTypeScreen();
+        break;
+      case '/aya-work-type':
+        page = const AyaWorkTypeScreen();
+        break;
+      case '/client-details':
+        page = const ClientDetailsScreen();
+        break;
+      case '/schedule':
+        page = const ScheduleContactScreen();
+        break;
+      case '/request-confirmation':
+        page = const RequestConfirmationScreen();
+        break;
+
+      // ── Admin panel ─────────────────────────────────────────────────────
+      case '/admin-login':
+        page = const AdminLoginScreen();
+        break;
+      case '/admin-dashboard':
+        page = const AdminDashboardScreen();
+        break;
+      case '/admin-request-detail':
+        page = const AdminRequestDetailScreen();
+        break;
+
+      // ── Utility ─────────────────────────────────────────────────────────
       case '/no-internet':
         page = NoInternetScreen(
           onRetry: () {
-            // Will be handled by ConnectivityWrapper
+            // Handled by ConnectivityWrapper
           },
         );
         break;

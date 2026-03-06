@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import '../../../core/constants/app_strings.dart';
-import '../../../core/providers/webview_provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import '../../../core/theme/app_colors.dart';
+import '../../../core/constants/app_strings.dart';
 import '../../auth/providers/auth_provider.dart';
 
-/// Home screen — full-screen WebView with a blended floating user icon.
+/// Native home screen — no WebView involved.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -14,36 +14,208 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen>
-    with WidgetsBindingObserver {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
+  Widget build(BuildContext context) {
+    final userName = ref.watch(authProvider).user?.fullName ?? 'User';
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
+    return Scaffold(
+      backgroundColor: const Color(0xFF0A0A0A),
+      body: Stack(
+        children: [
+          // Background Glow Effect
+          Positioned(
+            top: -100,
+            left: 0,
+            right: 0,
+            height: 600,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment.topCenter,
+                  radius: 1.0,
+                  colors: [
+                    const Color(0xFFE87C24).withOpacity(0.3),
+                    const Color(0xFF0A0A0A).withOpacity(0.0),
+                  ],
+                  stops: const [0.0, 0.7],
+                ),
+              ),
+            ),
+          ),
+          
+          SafeArea(
+            child: Column(
+              children: [
+                // Navbar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onLongPress: () =>
+                            Navigator.of(context).pushNamed('/admin-login'),
+                        child: Text(
+                          'SOMADHAN',
+                          style: GoogleFonts.inter(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: -1.0,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => _showProfileModal(context, ref, userName),
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF18181B), // zinc-900
+                            shape: BoxShape.circle,
+                            border: Border.all(color: const Color(0xFF27272A)), // zinc-800
+                          ),
+                          child: Center(
+                            child: Text(
+                              userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                              style: GoogleFonts.inter(
+                                color: const Color(0xFFA1A1AA), // zinc-400
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
-  /// Reload the WebView when the app comes back to the foreground.
-  /// This fixes the black screen that appears after the app is minimised
-  /// and reopened on Android.
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      final controller = ref.read(webViewControllerProvider);
-      controller.reload();
-    }
+                const Spacer(),
+
+                // Main Content
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Tagline Pill
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE87C24).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(100),
+                          border: Border.all(
+                            color: const Color(0xFFE87C24).withOpacity(0.2),
+                          ),
+                        ),
+                        child: Text(
+                          "KOLKATA'S TRUSTED HOME SERVICES",
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFFE87C24),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2.0,
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 32),
+
+                      // Hero Title
+                      Text(
+                        'Solve it.\nProperly.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: 60, // Adjust for screen size if needed
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          height: 0.95,
+                          letterSpacing: -2.0,
+                        ),
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Description
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 280),
+                        child: Text(
+                          'From plumbing and electrical work to construction and repairs — one call, one system, complete resolution.',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFFA1A1AA), // zinc-400
+                            fontSize: 14,
+                            height: 1.6,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 48),
+
+                      // CTA Button
+                      Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFE87C24).withOpacity(0.2),
+                              blurRadius: 40,
+                              spreadRadius: 0,
+                              offset: const Offset(0, 0),
+                            ),
+                          ],
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pushNamed('/service-list');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFE87C24),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 20,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'START SERVICE REQUEST',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              const Icon(Icons.arrow_forward, size: 20),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const Spacer(),
+                const SizedBox(height: 40), // Bottom padding
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // ── Profile modal ─────────────────────────────────────────────────────────
 
-  void _showProfileModal() {
-    final userName = ref.read(authProvider).user?.fullName ?? 'User';
-
+  void _showProfileModal(BuildContext context, WidgetRef ref, String userName) {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.surface,
@@ -70,7 +242,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             Container(
               width: 72,
               height: 72,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: AppColors.accentGradient,
                 shape: BoxShape.circle,
               ),
@@ -85,7 +257,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             Text(
               userName,
@@ -97,12 +269,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ),
             const SizedBox(height: 24),
 
-            // Logout
+            // Logout button
             SizedBox(
               width: double.infinity,
               height: 48,
               child: OutlinedButton.icon(
-                onPressed: () => _handleLogout(context),
+                onPressed: () => _handleLogout(context, ref),
                 icon: const Icon(Icons.logout_rounded, size: 20),
                 label: const Text(AppStrings.logout),
                 style: OutlinedButton.styleFrom(
@@ -120,17 +292,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  // ── Logout ────────────────────────────────────────────────────────────────
-
-  Future<void> _handleLogout(BuildContext sheetCtx) async {
-    Navigator.of(sheetCtx).pop();
+  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
+    Navigator.of(context).pop(); // close sheet
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(AppStrings.logout,
             style: TextStyle(color: AppColors.textPrimary)),
         content: const Text(AppStrings.logoutConfirm,
@@ -150,103 +319,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       ),
     );
 
-    if (confirmed == true && mounted) {
+    if (confirmed == true) {
       await ref.read(authProvider.notifier).logout();
-      if (mounted) {
+      if (context.mounted) {
         Navigator.of(context)
             .pushNamedAndRemoveUntil('/login', (route) => false);
       }
     }
-  }
-
-  // ── Build ─────────────────────────────────────────────────────────────────
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = ref.read(webViewControllerProvider);
-
-    // Watch reactive loading / error state driven by NavigationDelegate
-    final isLoading = ref.watch(webViewLoadingProvider);
-    final hasError  = ref.watch(webViewErrorProvider);
-
-    final topPadding = MediaQuery.of(context).padding.top;
-    const double brandTextWidth = 158.0;
-    const double iconTopOffset  = 18.0;
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Stack(
-        children: [
-          // ── WebView (edge-to-edge, always present so platform view persists)
-          Opacity(
-            opacity: hasError ? 0.0 : 1.0,
-            child: WebViewWidget(controller: controller),
-          ),
-
-          // ── Error state ───────────────────────────────────────────────────
-          if (hasError)
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline_rounded,
-                      color: AppColors.error, size: 64),
-                  const SizedBox(height: 16),
-                  const Text(
-                    AppStrings.pageLoadError,
-                    style: TextStyle(
-                        color: AppColors.textSecondary, fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      ref.read(webViewErrorProvider.notifier).state = false;
-                      ref.read(webViewLoadingProvider.notifier).state = true;
-                      controller.reload();
-                    },
-                    icon: const Icon(Icons.refresh_rounded),
-                    label: const Text(AppStrings.retry),
-                  ),
-                ],
-              ),
-            ),
-
-          // ── Loading overlay ────────────────────────────────────────────────
-          // IgnorePointer when not loading so touches pass through to the
-          // WebView — this was the root cause of "buttons not working".
-          if (isLoading && !hasError)
-            IgnorePointer(
-              child: Container(
-                color: AppColors.background,
-                alignment: Alignment.center,
-                child: const CircularProgressIndicator(
-                    color: AppColors.accent),
-              ),
-            ),
-
-          // ── Floating user icon ─────────────────────────────────────────────
-          Positioned(
-            top: topPadding + iconTopOffset,
-            left: brandTextWidth,
-            child: GestureDetector(
-              onTap: _showProfileModal,
-              behavior: HitTestBehavior.opaque,
-              child: const SizedBox(
-                width: 40,
-                height: 36,
-                child: Center(
-                  child: Icon(
-                    Icons.person_rounded,
-                    color: Colors.white,
-                    size: 22,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

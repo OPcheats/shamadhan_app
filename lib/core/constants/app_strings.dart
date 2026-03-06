@@ -53,6 +53,20 @@ class AppStrings {
   static const String cancel = 'Cancel';
   static const String yes = 'Yes';
 
+  // ─── Service Request ─────────────────────────────────────
+  static const String startServiceRequest = 'START SERVICE REQUEST';
+  static const String selectService = 'Select Service';
+  static const String selectType = 'Select Type';
+  static const String repair = 'Repair';
+  static const String newWork = 'New';
+  static const String yourDetails = 'Your Details';
+  static const String schedule = 'Schedule';
+  static const String continueBtn = 'CONTINUE';
+  static const String submitRequest = 'SUBMIT REQUEST';
+  static const String requestSubmitted = 'Request submitted! Opening WhatsApp…';
+  static const String heroTitle = 'Solve it. Properly.';
+  static const String heroSubtitle = 'Kolkata’s trusted home services';
+
   // ─── Internet ────────────────────────────────────
   static const String noInternet = 'No Internet Connection';
   static const String noInternetDesc =
@@ -62,5 +76,4 @@ class AppStrings {
   // ─── Errors ──────────────────────────────────────
   static const String somethingWentWrong = 'Something went wrong. Please try again.';
   static const String networkError = 'Network error. Please check your connection.';
-  static const String pageLoadError = 'Failed to load the page. Please try again.';
 }

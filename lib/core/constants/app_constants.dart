@@ -14,8 +14,11 @@ class AppConstants {
 
   static const String twoFactorBaseUrl = 'https://2factor.in/API/V1';
 
-  // ─── WebView ─────────────────────────────────────
-  static const String homeWebUrl = 'https://shamadhan.in/';
+  // ─── Service Requests ────────────────────────────
+  static const String appwriteServiceRequestsCollectionId = 'service_requests';
+
+  // ─── WhatsApp ─────────────────────────────────────
+  static const String whatsappBusinessNumber = '918420745907'; // Replace with actual number
 
   // ─── OTP ─────────────────────────────────────────
   static const int otpExpirySeconds = 120; // 2 minutes

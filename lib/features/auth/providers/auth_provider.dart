@@ -1,6 +1,9 @@
+import 'dart:async';
+import 'package:appwrite/appwrite.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/network/api_client.dart';
 import '../models/user_model.dart';
 import '../services/appwrite_service.dart';
 import '../services/otp_service.dart';
@@ -56,6 +59,25 @@ class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier(this._appwriteService, this._otpService)
       : super(const AuthState());
 
+  /// Convert raw exceptions into user-friendly messages.
+  String _friendlyError(Object e) {
+    if (e is TimeoutException) {
+      return 'Connection timed out. Please check your internet and try again.';
+    }
+    if (e is AppwriteException) {
+      return 'Server error. Please try again later.';
+    }
+    if (e is ApiException) {
+      final msg = e.message.toLowerCase();
+      if (msg.contains('timeout') || msg.contains('network')) {
+        return 'Network error. Please check your internet connection.';
+      }
+      return 'Could not send OTP. Please try again.';
+    }
+    if (e is OtpException) return e.message;
+    return 'Something went wrong. Please try again.';
+  }
+
   /// Check if user is already logged in via SharedPreferences.
   Future<bool> checkExistingSession() async {
     final prefs = await SharedPreferences.getInstance();
@@ -105,7 +127,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: _friendlyError(e),
       );
     }
   }
@@ -134,7 +156,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: _friendlyError(e),
       );
     }
   }
@@ -191,7 +213,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: _friendlyError(e),
       );
       return false;
     }

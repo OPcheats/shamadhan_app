@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // Primary colors
-  static const Color background = Color(0xFF0F0F0F);
-  static const Color accent = Color(0xFFFF6B00);
-  static const Color accentLight = Color(0xFFFF8C33);
+  // Primary colors — matches shamadhan.in CSS vars exactly
+  static const Color background = Color(0xFF0A0A0A);
+  static const Color accent = Color(0xFFF97316);     // Tailwind orange-500, website --accent
+  static const Color accentLight = Color(0xFFFB923C); // Tailwind orange-400
 
   // Surface colors
   static const Color surface = Color(0xFF1A1A1A);
@@ -29,4 +29,21 @@ class AppColors {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
+
+  // Shadows
+  static final List<BoxShadow> shadowSoft = [
+    BoxShadow(
+      color: Colors.black.withValues(alpha: 0.35),
+      offset: const Offset(0, 12),
+      blurRadius: 40,
+    ),
+  ];
+
+  static final List<BoxShadow> shadowGlow = [
+    BoxShadow(
+      color: const Color(0xFFF97316).withValues(alpha: 0.25),
+      offset: const Offset(0, 12),
+      blurRadius: 40,
+    ),
+  ];
 }

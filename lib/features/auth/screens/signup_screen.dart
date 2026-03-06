@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/constants/app_strings.dart';
-import '../../../core/providers/webview_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/validators.dart';
 import '../providers/auth_provider.dart';
@@ -23,13 +22,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _mobileController = TextEditingController();
   bool _isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(webViewControllerProvider);
-    });
-  }
 
   @override
   void dispose() {

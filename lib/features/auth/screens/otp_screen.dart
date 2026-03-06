@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_strings.dart';
-import '../../../core/providers/webview_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../providers/auth_provider.dart';
 
@@ -34,10 +33,6 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   void initState() {
     super.initState();
     _startTimer();
-    // Ensure WebView is already loading in the background
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(webViewControllerProvider);
-    });
   }
 
   void _startTimer() {
