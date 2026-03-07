@@ -105,10 +105,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Logo
-                    SvgPicture.asset(
-                      'assets/svgs/logo.svg',
+                    Image.asset(
+                      'assets/images/logo.png',
                       width: 120,
                       height: 120,
+                      fit: BoxFit.contain,
                     ),
                     const SizedBox(height: 24),
                     // App name

@@ -122,25 +122,38 @@ class _ServiceTypeScreenState extends ConsumerState<ServiceTypeScreen> {
                   
                   // Service Cards List
                   Expanded(
-                    child: ListView(
-                      physics: const BouncingScrollPhysics(),
-                      children: [
-                        _buildCard(
-                          index: 0,
-                          number: '01',
-                          title: 'REPAIR',
-                          subtitle: 'Fixing existing issues, maintenance, or restoration works.',
-                          isSelected: _selectedIndex == 0,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildCard(
-                          index: 1,
-                          number: '02',
-                          title: 'NEW',
-                          subtitle: 'Fresh installations, construction, or brand new setup projects.',
-                          isSelected: _selectedIndex == 1,
-                        ),
-                      ],
+                    child: Consumer(
+                      builder: (context, ref, child) {
+                        final selectedService = ref.watch(serviceRequestProvider).service;
+                        final isLand = selectedService == 'Land';
+
+                        return ListView(
+                          physics: const BouncingScrollPhysics(),
+                          children: [
+                            _buildCard(
+                              index: 0,
+                              number: '01',
+                              title: isLand ? 'OLD' : 'REPAIR',
+                              subtitle: isLand 
+                                ? 'Existing land property or resale plots available in the market.'
+                                : 'Fixing existing issues, maintenance, or restoration works.',
+                              isSelected: _selectedIndex == 0,
+                              hideSubheading: isLand,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildCard(
+                              index: 1,
+                              number: '02',
+                              title: 'NEW',
+                              subtitle: isLand 
+                                ? 'Fresh land purchase, new development projects or original listings.'
+                                : 'Fresh installations, construction, or brand new setup projects.',
+                              isSelected: _selectedIndex == 1,
+                              hideSubheading: isLand,
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                   
@@ -153,7 +166,16 @@ class _ServiceTypeScreenState extends ConsumerState<ServiceTypeScreen> {
                       onPressed: _selectedIndex == null
                           ? null
                           : () {
-                              final type = _selectedIndex == 0 ? 'Repair' : 'New';
+                              final selectedService = ref.read(serviceRequestProvider).service;
+                              final isLand = selectedService == 'Land';
+                              
+                              String type;
+                              if (isLand) {
+                                type = _selectedIndex == 0 ? 'Old' : 'New';
+                              } else {
+                                type = _selectedIndex == 0 ? 'Repair' : 'New';
+                              }
+                              
                               ref.read(serviceRequestProvider.notifier).setType(type);
                               Navigator.of(context).pushNamed('/client-details');
                             },
@@ -225,6 +247,7 @@ class _ServiceTypeScreenState extends ConsumerState<ServiceTypeScreen> {
     required String title,
     required String subtitle,
     required bool isSelected,
+    bool hideSubheading = false,
   }) {
     return GestureDetector(
       onTap: () => setState(() => _selectedIndex = index),
@@ -269,15 +292,16 @@ class _ServiceTypeScreenState extends ConsumerState<ServiceTypeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    'SERVICE TYPE',
-                    style: GoogleFonts.syncopate(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? const Color(0xFFE87D25) : Colors.grey[600],
-                      letterSpacing: 1.5,
+                  if (!hideSubheading)
+                    Text(
+                      'SERVICE TYPE',
+                      style: GoogleFonts.syncopate(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: isSelected ? const Color(0xFFE87D25) : Colors.grey[600],
+                        letterSpacing: 1.5,
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 4),
                   Text(
                     title,

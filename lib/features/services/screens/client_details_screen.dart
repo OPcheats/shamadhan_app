@@ -38,14 +38,12 @@ class _ClientDetailsScreenState extends ConsumerState<ClientDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Set status bar style
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
-
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A),
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          // Background Ambient Glow (Top Right)
+          // Background Glows...
           Positioned(
             top: -100,
             right: -100,
@@ -62,7 +60,6 @@ class _ClientDetailsScreenState extends ConsumerState<ClientDetailsScreen> {
               ),
             ),
           ),
-          // Background Ambient Glow (Bottom Left)
           Positioned(
             bottom: -50,
             left: -50,
@@ -83,18 +80,17 @@ class _ClientDetailsScreenState extends ConsumerState<ClientDetailsScreen> {
           SafeArea(
             child: Column(
               children: [
-                // Header Section
+                // Header remains fixed
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Back Button
                       Container(
                         width: 40,
                         height: 40,
                         decoration: const BoxDecoration(
-                          color: Color(0xFF18181B), // zinc-900
+                          color: Color(0xFF18181B),
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
@@ -104,20 +100,16 @@ class _ClientDetailsScreenState extends ConsumerState<ClientDetailsScreen> {
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // Step Indicator
-                      // Aya skips a step, so if service is Aya this is Step 2, otherwise it's Step 3.
-                      // For visual consistency with your design, we will show "STEP 3/5".
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF27272A), // zinc-800
+                          color: const Color(0xFF27272A),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Text(
                           'STEP 3/5',
                           style: TextStyle(
-                            color: Color(0xFFA1A1AA), // zinc-400
+                            color: Color(0xFFA1A1AA),
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1.5,
@@ -125,13 +117,11 @@ class _ClientDetailsScreenState extends ConsumerState<ClientDetailsScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-
-                      // Title
                       RichText(
                         text: const TextSpan(
                           style: TextStyle(
                             fontSize: 36,
-                            fontWeight: FontWeight.w800, // ExtraBold
+                            fontWeight: FontWeight.w800,
                             height: 1.1,
                             color: Colors.white,
                             letterSpacing: -1.0,
@@ -146,12 +136,10 @@ class _ClientDetailsScreenState extends ConsumerState<ClientDetailsScreen> {
                         ),
                       ),
                       const SizedBox(height: 12),
-
-                      // Subtitle
                       const Text(
                         'Please provide your contact information to proceed with the booking.',
                         style: TextStyle(
-                          color: Color(0xFFA1A1AA), // zinc-400
+                          color: Color(0xFFA1A1AA),
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           height: 1.5,
@@ -161,17 +149,19 @@ class _ClientDetailsScreenState extends ConsumerState<ClientDetailsScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
 
-                // Form Section (Scrollable)
+                // Form Section (Scrollable INCLUDING Footer)
                 Expanded(
                   child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Form(
                       key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          const SizedBox(height: 16),
                           _buildInputGroup(
                             label: 'FULL NAME',
                             child: _buildTextField(
@@ -189,7 +179,7 @@ class _ClientDetailsScreenState extends ConsumerState<ClientDetailsScreen> {
                           ),
                           const SizedBox(height: 24),
                           _buildInputGroup(
-                            label: 'FULL ADDRESS / LOCATION',
+                            label: 'ADDRESS / LOCATION',
                             child: _buildTextField(
                               controller: _addressCtrl,
                               hintText: 'Enter your full service address',
@@ -200,117 +190,102 @@ class _ClientDetailsScreenState extends ConsumerState<ClientDetailsScreen> {
                                   (v == null || v.trim().isEmpty) ? 'Address is required' : null,
                             ),
                           ),
-                          const SizedBox(height: 32),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                          
+                          const SizedBox(height: 40),
 
-                // Footer Section
-                Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    children: [
-                      // Zero Liability Card
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF141414), // surface-dark
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFF27272A)), // zinc-800
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE87C2E).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.verified_user_outlined,
-                                color: Color(0xFFE87C2E),
-                                size: 20,
-                              ),
+                          // Zero Liability Card moved inside scroll view
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF141414),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: const Color(0xFF27272A)),
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE87C2E).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                    Icons.verified_user_outlined,
+                                    color: Color(0xFFE87C2E),
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                const Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'ZERO LIABILITY',
+                                        style: TextStyle(
+                                          color: Color(0xFFE4E4E7),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        'Your data is encrypted. We only share necessary details with verified service professionals.',
+                                        style: TextStyle(
+                                          color: Color(0xFFA1A1AA),
+                                          fontSize: 11,
+                                          height: 1.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          
+                          const SizedBox(height: 24),
+
+                          // Continue Button moved inside scroll view
+                          SizedBox(
+                            width: double.infinity,
+                            height: 60,
+                            child: ElevatedButton(
+                              onPressed: _handleContinue,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFE87C2E),
+                                foregroundColor: Colors.white,
+                                elevation: 4,
+                                shadowColor: const Color(0xFFE87C2E).withOpacity(0.2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Text(
-                                    'ZERO LIABILITY',
+                                  Text(
+                                    'CONTINUE',
                                     style: TextStyle(
-                                      color: Color(0xFFE4E4E7), // zinc-200
-                                      fontSize: 12,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.5,
+                                      letterSpacing: 1.2,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  const Text(
-                                    'Your data is encrypted. We only share necessary details with verified service professionals.',
-                                    style: TextStyle(
-                                      color: Color(0xFFA1A1AA), // zinc-400
-                                      fontSize: 11,
-                                      height: 1.5,
-                                    ),
-                                  ),
+                                  SizedBox(width: 8),
+                                  Icon(Icons.arrow_forward, size: 20),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Continue Button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 60,
-                        child: ElevatedButton(
-                          onPressed: _handleContinue,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFE87C2E),
-                            foregroundColor: Colors.white,
-                            elevation: 4,
-                            shadowColor: const Color(0xFFE87C2E).withOpacity(0.2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Text(
-                                'CONTINUE',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              Icon(Icons.arrow_forward, size: 20),
-                            ],
-                          ),
-                        ),
+                          
+                          const SizedBox(height: 40),
+                        ],
                       ),
-                      
-                      // Home Indicator (Visual only)
-                      const SizedBox(height: 32),
-                      Container(
-                        width: 128,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF27272A),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ],

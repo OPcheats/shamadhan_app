@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -19,198 +20,223 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final userName = ref.watch(authProvider).user?.fullName ?? 'User';
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A),
-      body: Stack(
-        children: [
-          // Background Glow Effect
-          Positioned(
-            top: -100,
-            left: 0,
-            right: 0,
-            height: 600,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment.topCenter,
-                  radius: 1.0,
-                  colors: [
-                    const Color(0xFFE87C24).withOpacity(0.3),
-                    const Color(0xFF0A0A0A).withOpacity(0.0),
-                  ],
-                  stops: const [0.0, 0.7],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldPop = await _showExitDialog(context);
+        if (shouldPop && context.mounted) {
+          SystemNavigator.pop();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            // Background Glow Effect
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment.center,
+                    radius: 1.2,
+                    colors: [
+                      const Color(0xFFFF7800).withOpacity(0.35),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.7],
+                  ),
                 ),
               ),
             ),
-          ),
-          
-          SafeArea(
-            child: Column(
-              children: [
-                // Navbar
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onLongPress: () =>
-                            Navigator.of(context).pushNamed('/admin-login'),
-                        child: Text(
-                          'SOMADHAN',
-                          style: GoogleFonts.inter(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: -1.0,
+            
+            SafeArea(
+              child: Column(
+                children: [
+                  // Navbar
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onLongPress: () =>
+                              Navigator.of(context).pushNamed('/admin-login'),
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            height: 40,
+                            fit: BoxFit.contain,
                           ),
                         ),
-                      ),
-                      GestureDetector(
-                        onTap: () => _showProfileModal(context, ref, userName),
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF18181B), // zinc-900
-                            shape: BoxShape.circle,
-                            border: Border.all(color: const Color(0xFF27272A)), // zinc-800
-                          ),
-                          child: Center(
-                            child: Text(
-                              userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                              style: GoogleFonts.inter(
-                                color: const Color(0xFFA1A1AA), // zinc-400
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                        GestureDetector(
+                          onTap: () => _showProfileModal(context, ref, userName),
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF18181B), // zinc-900
+                              shape: BoxShape.circle,
+                              border: Border.all(color: const Color(0xFF27272A)), // zinc-800
                             ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const Spacer(),
-
-                // Main Content
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Tagline Pill
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE87C24).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(100),
-                          border: Border.all(
-                            color: const Color(0xFFE87C24).withOpacity(0.2),
-                          ),
-                        ),
-                        child: Text(
-                          "KOLKATA'S TRUSTED HOME SERVICES",
-                          style: GoogleFonts.inter(
-                            color: const Color(0xFFE87C24),
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2.0,
-                          ),
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 32),
-
-                      // Hero Title
-                      Text(
-                        'Solve it.\nProperly.',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(
-                          fontSize: 60, // Adjust for screen size if needed
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          height: 0.95,
-                          letterSpacing: -2.0,
-                        ),
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      // Description
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 280),
-                        child: Text(
-                          'From plumbing and electrical work to construction and repairs — one call, one system, complete resolution.',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                            color: const Color(0xFFA1A1AA), // zinc-400
-                            fontSize: 14,
-                            height: 1.6,
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 48),
-
-                      // CTA Button
-                      Container(
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFE87C24).withOpacity(0.2),
-                              blurRadius: 40,
-                              spreadRadius: 0,
-                              offset: const Offset(0, 0),
-                            ),
-                          ],
-                        ),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pushNamed('/service-list');
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFE87C24),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 32,
-                              vertical: 20,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(100),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'START SERVICE REQUEST',
+                            child: Center(
+                              child: Text(
+                                userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
                                 style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1.2,
+                                  color: const Color(0xFFA1A1AA), // zinc-400
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              const Icon(Icons.arrow_forward, size: 20),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-
-                const Spacer(),
-                const SizedBox(height: 40), // Bottom padding
-              ],
+  
+                  const Spacer(),
+  
+                  // Main Content
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Tagline Pill
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE87C24).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(
+                              color: const Color(0xFFE87C24).withOpacity(0.2),
+                            ),
+                          ),
+                          child: Text(
+                            "KOLKATA'S TRUSTED HOME SERVICES",
+                            style: GoogleFonts.inter(
+                              color: const Color(0xFFE87C24),
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2.0,
+                            ),
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 32),
+  
+                        // Hero Title
+                        Text(
+                          'Solve it.\nProperly.',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 60, // Adjust for screen size if needed
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            height: 0.95,
+                            letterSpacing: -2.0,
+                          ),
+                        ),
+  
+                        const SizedBox(height: 32),
+  
+                        // Description
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 280),
+                          child: Text(
+                            'From plumbing and electrical work to construction and repairs — one call, one system, complete resolution.',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(
+                              color: const Color(0xFFA1A1AA), // zinc-400
+                              fontSize: 14,
+                              height: 1.6,
+                            ),
+                          ),
+                        ),
+  
+                        const SizedBox(height: 48),
+  
+                        // CTA Button
+                        Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFE87C24).withOpacity(0.2),
+                                blurRadius: 40,
+                                spreadRadius: 0,
+                                offset: const Offset(0, 0),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pushNamed('/service-list');
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFE87C24),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 32,
+                                vertical: 20,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'START SERVICE REQUEST',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Icon(Icons.arrow_forward, size: 20),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+  
+                  const Spacer(),
+                  const SizedBox(height: 40), // Bottom padding
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  Future<bool> _showExitDialog(BuildContext context) async {
+    return await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: const Color(0xFF141414),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Text('Exit App', style: TextStyle(color: Colors.white)),
+            content: const Text('Are you sure you want to exit the app?', style: TextStyle(color: Color(0xFFA1A1AA))),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('CANCEL', style: TextStyle(color: Color(0xFFA1A1AA))),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('EXIT', style: TextStyle(color: Color(0xFFE87C24), fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   // ── Profile modal ─────────────────────────────────────────────────────────

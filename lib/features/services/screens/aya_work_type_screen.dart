@@ -1,31 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/theme/app_colors.dart';
 import '../providers/service_request_provider.dart';
-
-const _ayaOptions = [
-  (
-    label: 'Child Care',
-    description: 'Nanny, babysitting, and infant care',
-    icon: Icons.child_care_rounded,
-  ),
-  (
-    label: 'Elder Care',
-    description: 'Assistance and care for senior family members',
-    icon: Icons.elderly_rounded,
-  ),
-  (
-    label: 'Patient Care',
-    description: 'Post-surgery or illness recovery support',
-    icon: Icons.medical_services_rounded,
-  ),
-  (
-    label: 'House Help',
-    description: 'Cooking, cleaning, and household assistance',
-    icon: Icons.home_rounded,
-  ),
-];
 
 class AyaWorkTypeScreen extends ConsumerStatefulWidget {
   const AyaWorkTypeScreen({super.key});
@@ -35,200 +12,383 @@ class AyaWorkTypeScreen extends ConsumerStatefulWidget {
 }
 
 class _AyaWorkTypeScreenState extends ConsumerState<AyaWorkTypeScreen> {
-  String? _selected;
+  int _selectedIndex = 1; // Default selected index (Elder Care)
+
+  final List<Map<String, String>> _services = [
+    {
+      'title': 'CHILD CARE',
+      'desc': 'Nanny and babysitting services for your little ones.',
+    },
+    {
+      'title': 'ELDER CARE',
+      'desc': 'Dedicated support and companionship for senior citizens.',
+    },
+    {
+      'title': 'PATIENT CARE',
+      'desc': 'Professional nursing and post-operative home assistance.',
+    },
+    {
+      'title': 'HOUSE HELP',
+      'desc': 'General domestic assistance and housekeeping support.',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text(
-          'Aya Service',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w700,
-            fontSize: 20,
-          ),
-        ),
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'What type of Aya service do you need?',
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Options
-            Expanded(
-              child: ListView.separated(
-                physics: const BouncingScrollPhysics(),
-                itemCount: _ayaOptions.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 14),
-                itemBuilder: (context, index) {
-                  final option = _ayaOptions[index];
-                  final isSelected = _selected == option.label;
-                  return _AyaOptionCard(
-                    label: option.label,
-                    description: option.description,
-                    icon: option.icon,
-                    isSelected: isSelected,
-                    onTap: () => setState(() => _selected = option.label),
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Premium CTA button
-            GestureDetector(
-              onTap: _selected == null
-                  ? null
-                  : () {
-                      ref
-                          .read(serviceRequestProvider.notifier)
-                          .setAyaType(_selected!);
-                      Navigator.of(context).pushNamed('/client-details');
-                    },
-              child: Container(
-                width: double.infinity,
-                height: 52,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: _selected != null ? AppColors.shadowGlow : null,
-                  color: _selected != null ? AppColors.accent : AppColors.surfaceLight,
-                ),
-                child: Stack(
-                  children: [
-                    if (_selected != null)
-                      Positioned.fill(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.white.withValues(alpha: 0.15),
-                                Colors.transparent,
-                              ],
-                              stops: const [0.0, 0.4],
-                            ),
-                          ),
-                        ),
-                      ),
-                    Center(
-                      child: Text(
-                        'CONTINUE',
-                        style: TextStyle(
-                          color: _selected == null ? AppColors.textHint : Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AyaOptionCard extends StatelessWidget {
-  final String label;
-  final String description;
-  final IconData icon;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _AyaOptionCard({
-    required this.label,
-    required this.description,
-    required this.icon,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.accent.withValues(alpha: 0.12)
-              : AppColors.surface,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: isSelected ? AppColors.accent : AppColors.surfaceLight,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 56,
-              height: 56,
+      backgroundColor: const Color(0xFF0A0A0A),
+      body: Stack(
+        children: [
+          // Top Right Glow
+          Positioned(
+            top: -50,
+            right: -50,
+            child: Container(
+              width: 250,
+              height: 250,
               decoration: BoxDecoration(
-                gradient: isSelected
-                    ? AppColors.accentGradient
-                    : const LinearGradient(
-                        colors: [AppColors.surfaceLight, AppColors.surfaceLight],
-                      ),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(
-                icon,
-                color: isSelected ? Colors.white : AppColors.textSecondary,
-                size: 28,
-              ),
-            ),
-            const SizedBox(width: 18),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      color:
-                          isSelected ? AppColors.accent : AppColors.textPrimary,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 17,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                    ),
+                shape: BoxShape.circle,
+                color: const Color(0xFFE87C2E).withOpacity(0.05),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFE87C2E).withOpacity(0.05),
+                    blurRadius: 100,
+                    spreadRadius: 50,
                   ),
                 ],
               ),
             ),
-            if (isSelected)
-              const Icon(Icons.check_circle_rounded,
-                  color: AppColors.accent, size: 24),
+          ),
+          // Bottom Left Glow
+          Positioned(
+            bottom: -100,
+            left: -100,
+            child: Container(
+              width: 350,
+              height: 350,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFE87C2E).withOpacity(0.05),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFE87C2E).withOpacity(0.05),
+                    blurRadius: 120,
+                    spreadRadius: 60,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: _buildIconButton(Icons.chevron_left),
+                      ),
+                      Column(
+                        children: [
+                          Text(
+                            'STEP 2 / 5',
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2.0,
+                              color: const Color(0xFFE87C2E),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            width: 96,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF262626),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                            child: FractionallySizedBox(
+                              alignment: Alignment.centerLeft,
+                              widthFactor: 0.4,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE87C2E),
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).popUntil((route) => route.isFirst),
+                        child: _buildIconButton(Icons.close),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 40),
+                  
+                  // Title
+                  Text(
+                    'IDENTIFY',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w900,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.white,
+                      height: 1.1,
+                      letterSpacing: -1.0,
+                    ),
+                  ),
+                  Text(
+                    'AYA SERVICE',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w900,
+                      fontStyle: FontStyle.italic,
+                      color: const Color(0xFFE87C2E),
+                      height: 1.1,
+                      letterSpacing: -1.0,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'What type of Aya service do you need for your home or facility?',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFFA3A3A3),
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  
+                  // Options List
+                  ...List.generate(_services.length, (index) {
+                    return _buildServiceCard(index);
+                  }),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Continue Button
+                  GestureDetector(
+                    onTap: () {
+                      final selectedTitle = _services[_selectedIndex]['title']!;
+                      ref
+                          .read(serviceRequestProvider.notifier)
+                          .setAyaType(selectedTitle);
+                      Navigator.of(context).pushNamed('/client-details');
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE87C2E),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFE87C2E).withOpacity(0.2),
+                            blurRadius: 15,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'CONTINUE REQUEST',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                              fontStyle: FontStyle.italic,
+                              letterSpacing: 2.0,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Footer Text
+                  Center(
+                    child: Text(
+                      'EXPERT CARE, GUARANTEED TRUST.',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 2.0,
+                        color: const Color(0xFF737373),
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 48),
+                  
+                  // Brand Footer
+                  const Divider(color: Color(0xFF262626)),
+                  const SizedBox(height: 32),
+                  Opacity(
+                    opacity: 0.4,
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Image.asset(
+                            'assets/images/logo.png',
+                            height: 32,
+                            fit: BoxFit.contain,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'RESOLUTION · AUTHORITY',
+                            style: GoogleFonts.inter(
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 4.0,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIconButton(IconData icon) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: const Color(0xFF141414),
+        shape: BoxShape.circle,
+        border: Border.all(color: const Color(0xFF262626)),
+      ),
+      child: Icon(icon, color: Colors.white, size: 20),
+    );
+  }
+
+  Widget _buildServiceCard(int index) {
+    final isSelected = _selectedIndex == index;
+    final service = _services[index];
+    
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: const Color(0xFF141414),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? const Color(0xFFE87C2E) : const Color(0xFF262626),
+            width: 2,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFFE87C2E).withOpacity(0.15),
+                    blurRadius: 20,
+                  )
+                ]
+              : [],
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Background Number
+            Positioned(
+              right: 0,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: Text(
+                  '${index + 1}',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 72,
+                    fontWeight: FontWeight.w900,
+                    fontStyle: FontStyle.italic,
+                    color: isSelected
+                        ? const Color(0xFFE87C2E).withOpacity(0.1)
+                        : Colors.white.withOpacity(0.03),
+                    height: 1.0,
+                  ),
+                ),
+              ),
+            ),
+            
+            // Content
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'SERVICE TYPE',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2.0,
+                        color: isSelected ? const Color(0xFFE87C2E) : const Color(0xFF737373),
+                      ),
+                    ),
+                    if (isSelected)
+                      const Icon(
+                        Icons.check_circle_outline,
+                        color: Color(0xFFE87C2E),
+                        size: 20,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  service['title']!,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    fontStyle: FontStyle.italic,
+                    color: isSelected ? const Color(0xFFE87C2E) : Colors.white,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: Text(
+                    service['desc']!,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: const Color(0xFF737373),
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

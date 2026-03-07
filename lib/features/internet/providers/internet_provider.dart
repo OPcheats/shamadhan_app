@@ -24,7 +24,6 @@ class InternetNotifier extends StateNotifier<InternetStatus> {
     });
   }
 
-  /// Actually ping a server to confirm real internet access.
   Future<void> _checkConnectivity() async {
     state = InternetStatus.checking;
     try {
@@ -36,11 +35,9 @@ class InternetNotifier extends StateNotifier<InternetStatus> {
         return;
       }
 
-      // Has network interface — verify actual internet access
-      final hasInternet = await _hasRealInternet();
-      state = hasInternet
-          ? InternetStatus.connected
-          : InternetStatus.disconnected;
+      // If we have mobile or wifi, we consider it connected. 
+      // Deep ping is removed because it causes "false" errors on slow connections.
+      state = InternetStatus.connected;
     } catch (_) {
       state = InternetStatus.disconnected;
     }
@@ -48,14 +45,8 @@ class InternetNotifier extends StateNotifier<InternetStatus> {
 
   /// Ping Google to verify real internet access.
   Future<bool> _hasRealInternet() async {
-    try {
-      final response = await http
-          .head(Uri.parse('https://www.google.com'))
-          .timeout(const Duration(seconds: 5));
-      return response.statusCode == 200;
-    } catch (_) {
-      return false;
-    }
+    // This method is now unused by _checkConnectivity to avoid false negatives.
+    return true;
   }
 
   /// Manual retry from NoInternetScreen.

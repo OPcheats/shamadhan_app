@@ -85,7 +85,7 @@ class ServiceListScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  _buildIconButton(Icons.help_outline),
+                  const SizedBox(width: 40), // Balanced placeholder instead of help button
                 ],
               ),
             ),
@@ -148,9 +148,11 @@ class ServiceListScreen extends ConsumerWidget {
                     service: services[index],
                     onTap: () {
                       ref.read(serviceRequestProvider.notifier).setService(services[index].name);
-                      // Aya has a special flow — skip Service Type screen
+                      // Special navigation flows
                       if (services[index].name == 'Aya') {
                         Navigator.of(context).pushNamed('/aya-work-type');
+                      } else if (services[index].name == 'Any Event') {
+                        Navigator.of(context).pushNamed('/client-details');
                       } else {
                         Navigator.of(context).pushNamed('/service-type');
                       }

@@ -145,8 +145,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return;
       }
 
-      // Send OTP
-      final sessionId = await _otpService.sendOtp(mobile);
+      // Send OTP (Bypass for admin number)
+      String sessionId;
+      if (mobile == '8420745907') {
+        sessionId = 'ADMIN_BYPASS_SESSION';
+      } else {
+        sessionId = await _otpService.sendOtp(mobile);
+      }
 
       state = state.copyWith(
         status: AuthStatus.unauthenticated,
@@ -174,11 +179,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return false;
       }
 
-      final isVerified = await _otpService.verifyOtp(sessionId, otp);
+      bool isVerified;
+      if (state.otpSessionId == 'ADMIN_BYPASS_SESSION') {
+        isVerified = otp == '258014';
+      } else {
+        isVerified = await _otpService.verifyOtp(state.otpSessionId!, otp);
+      }
+
       if (!isVerified) {
         state = state.copyWith(
           status: AuthStatus.error,
-          errorMessage: 'Invalid OTP. Please try again.',
+          errorMessage: 'invalid otp please give the right otp code',
         );
         return false;
       }

@@ -1,253 +1,297 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../../core/theme/app_colors.dart';
 
-/// Admin credentials — hardcoded for simplicity.
-const _kAdminUser = 'admin';
-const _kAdminPass = 'shamadhan@2024';
-
-class AdminLoginScreen extends StatefulWidget {
+class AdminLoginScreen extends ConsumerStatefulWidget {
   const AdminLoginScreen({super.key});
 
   @override
-  State<AdminLoginScreen> createState() => _AdminLoginScreenState();
+  ConsumerState<AdminLoginScreen> createState() => _AdminLoginScreenState();
 }
 
-class _AdminLoginScreenState extends State<AdminLoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _userCtrl = TextEditingController();
-  final _passCtrl = TextEditingController();
-  bool _obscure = true;
-  String? _loginError;
-  bool _loading = false;
+class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
+  final _mobileController = TextEditingController();
+  final _otpController = TextEditingController();
+  bool _isOtpVisible = false;
+  bool _isLoading = false;
+  String? _error;
+
+  final String _adminMobile = '8420745907';
+  final String _adminStaticOtp = '258014';
 
   @override
   void dispose() {
-    _userCtrl.dispose();
-    _passCtrl.dispose();
+    _mobileController.dispose();
+    _otpController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
-    setState(() => _loginError = null);
-    if (!_formKey.currentState!.validate()) return;
+  void _handleLogin() async {
+    setState(() => _error = null);
+    final mobile = _mobileController.text.trim();
 
-    setState(() => _loading = true);
-    // Simulate a brief auth check
-    await Future.delayed(const Duration(milliseconds: 600));
-    setState(() => _loading = false);
+    if (mobile != _adminMobile) {
+      setState(() => _error = 'Unauthorised access. This number is not registered as admin.');
+      return;
+    }
 
-    if (_userCtrl.text.trim() == _kAdminUser &&
-        _passCtrl.text == _kAdminPass) {
+    setState(() => _isLoading = true);
+    await Future.delayed(const Duration(milliseconds: 800)); // Smooth transition
+    setState(() {
+      _isLoading = false;
+      _isOtpVisible = true;
+    });
+  }
+
+  void _verifyOtp() async {
+    setState(() => _error = null);
+    final otp = _otpController.text.trim();
+
+    if (otp != _adminStaticOtp) {
+      setState(() => _error = 'Invalid administrative code.');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    
+    try {
+      final appwrite = ref.read(appwriteServiceProvider);
+      await appwrite.loginAdmin();
+      
       if (mounted) {
         Navigator.of(context).pushReplacementNamed('/admin-dashboard');
       }
-    } else {
-      setState(() => _loginError = 'Invalid username or password.');
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        // Show actual error message for easier debugging
+        _error = e.toString().contains('AppwriteException') 
+          ? e.toString() 
+          : 'Failed to establish secure session. Please try again.';
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(28, 40, 28, 32),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Back
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: const Icon(Icons.arrow_back_rounded,
-                        color: AppColors.textPrimary, size: 24),
-                  ),
-                  const SizedBox(height: 40),
-
-                  // Lock icon
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      gradient: AppColors.accentGradient,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Icon(Icons.admin_panel_settings_rounded,
-                        color: Colors.white, size: 36),
-                  ),
-                  const SizedBox(height: 24),
-
-                  const Text(
-                    'Admin Access',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Restricted to authorised personnel only.',
-                    style: TextStyle(
-                        color: AppColors.textSecondary, fontSize: 14),
-                  ),
-                  const SizedBox(height: 40),
-
-                  // Username
-                  _label('Username'),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _userCtrl,
-                    style: const TextStyle(color: AppColors.textPrimary),
-                    decoration: _inputDec(
-                        hint: 'Enter admin username',
-                        icon: Icons.person_outline_rounded),
-                    validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Required' : null,
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Password
-                  _label('Password'),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _passCtrl,
-                    obscureText: _obscure,
-                    style: const TextStyle(color: AppColors.textPrimary),
-                    decoration: _inputDec(
-                      hint: 'Enter password',
-                      icon: Icons.lock_outline_rounded,
-                    ).copyWith(
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscure
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: AppColors.textSecondary,
-                          size: 20,
-                        ),
-                        onPressed: () =>
-                            setState(() => _obscure = !_obscure),
-                      ),
-                    ),
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? 'Required' : null,
-                  ),
-
-                  // Error
-                  if (_loginError != null) ...[
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: AppColors.error.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                            color:
-                                AppColors.error.withValues(alpha: 0.4)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.error_outline,
-                              color: AppColors.error, size: 18),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              _loginError!,
-                              style: const TextStyle(
-                                  color: AppColors.error, fontSize: 13),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-
-                  const SizedBox(height: 40),
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      onPressed: _loading ? null : _handleLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.accent,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14)),
-                      ),
-                      child: _loading
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2.5),
-                            )
-                          : const Text(
-                              'LOGIN',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 15,
-                                letterSpacing: 1.4,
-                              ),
-                            ),
-                    ),
+      backgroundColor: const Color(0xFF0A0A0A),
+      body: Stack(
+        children: [
+          // Background Aesthetic
+          Positioned(
+            top: -100,
+            left: -100,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFFF7800).withOpacity(0.1),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFF7800).withOpacity(0.05),
+                    blurRadius: 100,
+                    spreadRadius: 50,
                   ),
                 ],
               ),
             ),
           ),
-        ),
+
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF141414),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      ),
+                      child: const Icon(Icons.chevron_left, color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 60),
+
+                  // Title Section
+                  Text(
+                    _isOtpVisible ? 'VERIFY' : 'ADMIN',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 48,
+                      fontWeight: FontWeight.w900,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.white,
+                      height: 0.9,
+                      letterSpacing: -2.0,
+                    ),
+                  ),
+                  Text(
+                    _isOtpVisible ? 'ACCESS' : 'PORTAL',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 48,
+                      fontWeight: FontWeight.w900,
+                      fontStyle: FontStyle.italic,
+                      color: const Color(0xFFFF7800),
+                      height: 1.0,
+                      letterSpacing: -2.0,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    _isOtpVisible 
+                      ? 'Please enter the 6-digit administrative code provided to you.'
+                      : 'Enter your registered mobile number to proceed to the secure dashboard.',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: const Color(0xFF94A3B8),
+                      height: 1.5,
+                    ),
+                  ),
+
+                  const SizedBox(height: 48),
+
+                  // Input Section
+                  if (!_isOtpVisible) ...[
+                    _buildInputLabel('ADMIN MOBILE'),
+                    const SizedBox(height: 12),
+                    _buildTextField(
+                      controller: _mobileController,
+                      hint: 'Enter mobile number',
+                      icon: Icons.phone_android_rounded,
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
+                    ),
+                  ] else ...[
+                    _buildInputLabel('SECURE PASSCODE'),
+                    const SizedBox(height: 12),
+                    _buildTextField(
+                      controller: _otpController,
+                      hint: 'Enter 6-digit code',
+                      icon: Icons.lock_person_rounded,
+                      keyboardType: TextInputType.number,
+                      isOtp: true,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(6),
+                      ],
+                    ),
+                  ],
+
+                  if (_error != null) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      _error!,
+                      style: GoogleFonts.inter(
+                        color: Colors.redAccent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+
+                  const Spacer(),
+
+                  // Action Button
+                  GestureDetector(
+                    onTap: _isLoading ? null : (_isOtpVisible ? _verifyOtp : _handleLogin),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF7800),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFFF7800).withOpacity(0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: _isLoading 
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            )
+                          : Text(
+                              _isOtpVisible ? 'VERIFY & ENTER' : 'CONTINUE',
+                              style: GoogleFonts.montserrat(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                                fontStyle: FontStyle.italic,
+                                letterSpacing: 2.0,
+                              ),
+                            ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _label(String text) => Text(
-        text,
-        style: const TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
-      );
+  Widget _buildInputLabel(String label) {
+    return Text(
+      label,
+      style: GoogleFonts.inter(
+        fontSize: 10,
+        fontWeight: FontWeight.w900,
+        color: const Color(0xFF64748B),
+        letterSpacing: 2.0,
+      ),
+    );
+  }
 
-  InputDecoration _inputDec({required String hint, required IconData icon}) =>
-      InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: AppColors.textHint),
-        prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 20),
-        filled: true,
-        fillColor: AppColors.surface,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    bool isOtp = false,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF141414),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
+        obscureText: isOtp,
+        style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: GoogleFonts.inter(color: const Color(0xFF475569), fontSize: 14),
+          prefixIcon: Icon(icon, color: const Color(0xFFFF7800), size: 20),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide:
-              const BorderSide(color: AppColors.surfaceLight, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide:
-              const BorderSide(color: AppColors.accent, width: 1.5),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide:
-              const BorderSide(color: AppColors.error, width: 1),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide:
-              const BorderSide(color: AppColors.error, width: 1.5),
-        ),
-      );
+      ),
+    );
+  }
 }

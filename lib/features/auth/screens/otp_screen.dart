@@ -69,12 +69,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
     if (success) {
       Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
-    } else {
-      final authState = ref.read(authProvider);
-      if (authState.errorMessage != null) {
-        _showError(authState.errorMessage!);
-      }
     }
+    // Error is handled by watching authProvider in build
   }
 
   Future<void> _resendOtp() async {
@@ -136,6 +132,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
     final maskedNumber =
         '${widget.mobileNumber.substring(0, 2)}****${widget.mobileNumber.substring(6)}';
 
@@ -230,6 +227,27 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                   );
                 }),
               ),
+
+              if (authState.errorMessage != null) ...[
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.error,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    authState.errorMessage!,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 32),
 
               // Timer

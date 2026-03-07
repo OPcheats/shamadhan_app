@@ -40,10 +40,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!mounted) return;
     setState(() => _isLoading = false);
 
+    // State is watched in build, so UI will update automatically
     final authState = ref.read(authProvider);
-    if (authState.errorMessage != null) {
-      _showError(authState.errorMessage!);
-    } else if (authState.otpSessionId != null) {
+    if (authState.otpSessionId != null) {
       Navigator.of(context).pushNamed(
         '/otp',
         arguments: mobile,
@@ -63,6 +62,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -77,10 +78,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 // Logo
                 Center(
-                  child: SvgPicture.asset(
-                    'assets/svgs/logo.svg',
-                    width: 80,
-                    height: 80,
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.contain,
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -132,6 +134,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   validator: Validators.validateMobile,
                 ),
+
+                if (authState.errorMessage != null) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.error,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      authState.errorMessage!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+
                 const SizedBox(height: 32),
 
                 // Login button

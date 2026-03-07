@@ -8,6 +8,7 @@ const _kTimeout = Duration(seconds: 10);
 class AppwriteService {
   late final Client _client;
   late final Databases _db;
+  late final Account _account;
 
   AppwriteService() {
     _client = Client()
@@ -15,6 +16,42 @@ class AppwriteService {
       ..setProject(AppConstants.appwriteProjectId);
 
     _db = Databases(_client);
+    _account = Account(_client);
+    
+    // Ensure we have at least an anonymous session for permissions to work
+    ensureSession();
+  }
+
+  /// Ensures the user has a valid Appwrite session (anonymous if not logged in).
+  Future<void> ensureSession() async {
+    try {
+      await _account.get();
+    } catch (_) {
+      try {
+        await _account.createAnonymousSession();
+      } catch (e) {
+        print('Error creating session: $e');
+      }
+    }
+  }
+
+  /// Log in as the admin user in Appwrite.
+  Future<void> loginAdmin() async {
+    try {
+      // Clear any existing session (Anonymous or otherwise) to ensure clean admin login
+      try {
+        await _account.deleteSession(sessionId: 'current');
+      } catch (_) { /* No session to delete */ }
+
+      // Log in with Admin credentials
+      await _account.createEmailPasswordSession(
+        email: 'piyushpaul108@gmail.com', 
+        password: 'shamadhan@2024',
+      );
+    } catch (e) {
+      print('Admin Appwrite login failed: $e');
+      rethrow;
+    }
   }
 
   /// Check if a user with the given mobile number already exists.
@@ -70,14 +107,34 @@ class AppwriteService {
       data: {'is_verified': true},
     ).timeout(_kTimeout);
   }
-  /// Save a service request to the `service_requests` collection.
+  /// Save a service request to the `service_requests` collection with specific permissions.
   Future<void> saveServiceRequest(Map<String, dynamic> data) async {
-    await _db.createDocument(
-      databaseId: AppConstants.appwriteDatabaseId,
-      collectionId: AppConstants.appwriteServiceRequestsCollectionId,
-      documentId: ID.unique(),
-      data: data,
-    ).timeout(_kTimeout);
+    try {
+      // Ensure we have a session before trying to get account info
+      await ensureSession();
+      
+      // Get the currently logged-in user's ID from Appwrite account
+      final user = await _account.get();
+      final clientUserId = user.$id;
+      final adminUserId = AppConstants.appwriteAdminUserId;
+
+      await _db.createDocument(
+        databaseId: AppConstants.appwriteDatabaseId,
+        collectionId: AppConstants.appwriteServiceRequestsCollectionId,
+        documentId: ID.unique(),
+        data: {
+          ...data,
+          'status': 'pending', // Default status
+        },
+        permissions: [
+          Permission.read(Role.user(clientUserId)),
+          // Note: Admin access is managed via Collection-level permissions in Appwrite Console
+        ],
+      ).timeout(_kTimeout);
+    } catch (e) {
+      // Fallback or rethrow if permissions cannot be set (e.g., no active session)
+      rethrow;
+    }
   }
 
   /// Fetch all service requests — used by the admin dashboard.
@@ -94,6 +151,25 @@ class AppwriteService {
       map['\$createdAt'] = doc.$createdAt;
       return map;
     }).toList();
+  }
+
+  /// Update the status of a service request document.
+  Future<void> updateServiceRequestStatus(String docId, String status) async {
+    await _db.updateDocument(
+      databaseId: AppConstants.appwriteDatabaseId,
+      collectionId: AppConstants.appwriteServiceRequestsCollectionId,
+      documentId: docId,
+      data: {'status': status},
+    ).timeout(_kTimeout);
+  }
+
+  /// Delete a service request document.
+  Future<void> deleteServiceRequest(String docId) async {
+    await _db.deleteDocument(
+      databaseId: AppConstants.appwriteDatabaseId,
+      collectionId: AppConstants.appwriteServiceRequestsCollectionId,
+      documentId: docId,
+    ).timeout(_kTimeout);
   }
 }
 

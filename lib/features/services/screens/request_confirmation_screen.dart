@@ -19,12 +19,12 @@ class RequestConfirmationScreen extends ConsumerWidget {
     final clientAddress = request.address.isEmpty ? 'UNKNOWN ADDRESS' : request.address;
     final prefDate = request.preferredDate.isEmpty ? 'N/A' : request.preferredDate;
     final prefTime = request.preferredTime.isEmpty ? 'N/A' : request.preferredTime;
-    final subType = request.type.isNotEmpty ? ' - ${request.type}' : '';
-    final ayaType = request.ayaType.isNotEmpty ? ' - ${request.ayaType}' : '';
+    // Combining service display text (Aya - Elder Care, Land - New, etc.)
+    String serviceDisplay = serviceName;
+    if (request.type.isNotEmpty) serviceDisplay += ' - ${request.type}';
+    if (request.ayaType.isNotEmpty) serviceDisplay += ' - ${request.ayaType}';
+    serviceDisplay = serviceDisplay.toUpperCase();
     final finalNotes = request.notes.isEmpty ? 'No additional notes provided.' : '"${request.notes}"';
-    
-    // Combining service display text 
-    final serviceDisplay = '$serviceName$subType$ayaType'.toUpperCase();
 
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A),

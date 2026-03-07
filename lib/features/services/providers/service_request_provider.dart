@@ -22,7 +22,11 @@ class SubmitState {
 class ServiceRequestNotifier extends StateNotifier<ServiceRequestModel> {
   ServiceRequestNotifier() : super(const ServiceRequestModel());
 
-  void setService(String service) => state = state.copyWith(service: service);
+  void setService(String service) => state = state.copyWith(
+        service: service,
+        type: '', // Clear type when service changes
+        ayaType: '', // Clear ayaType when service changes
+      );
   void setType(String type) => state = state.copyWith(type: type);
   void setAyaType(String ayaType) => state = state.copyWith(ayaType: ayaType);
   void setClientDetails({

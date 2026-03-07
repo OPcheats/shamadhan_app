@@ -7,6 +7,7 @@ class AppConstants {
   static const String appwriteProjectId = '69a70f620029fee9a7a2';
   static const String appwriteDatabaseId = '69a7157600307b65dea5';
   static const String appwriteUsersCollectionId = 'users';
+  static const String appwriteAdminUserId = '69a716e0002cf46b73fe'; // Replace with actual Admin User ID from Appwrite console
 
   // ─── 2Factor.in ──────────────────────────────────
   /// Replace with your 2Factor.in API key.
